@@ -4,10 +4,17 @@ const supported = "contacts" in navigator && "ContactsManager" in window;
 console.log("Supported: ", supported);
 console.log("Contacts: ", navigator);
 
+document.querySelector(
+  "code"
+).textContent = `supported: ${supported} \n navigator: ${navigator} \n contacts: ${navigator.contacts} \n ContactsManager: ${window.ContactsManager}`;
+
 async function getContacts() {
   console.log("Getting contacts...");
   if (supported) {
     console.log("Supported!");
+    document.querySelector(
+      "code"
+    ).textContent = `Getting contacts... \n Supported!`;
     const contacts = await navigator.contacts.select(props, opts);
     console.log(contacts);
   }
