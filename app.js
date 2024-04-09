@@ -17,6 +17,7 @@ async function getContacts() {
     ).textContent = `Getting contacts... \n Supported!`;
     const contacts = await navigator.contacts.select(props, opts);
     console.log(contacts);
+    document.querySelector("code").textContent = JSON.stringify(contacts);
   }
 }
 
