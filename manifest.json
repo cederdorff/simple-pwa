@@ -1,7 +1,7 @@
 {
   "name": "Simple PWA",
   "short_name": "SimplePWA",
-  "start_url": "/?home=true",
+  "start_url": "/simple-pwa",
   "icons": [
     {
       "src": "logo.png",
