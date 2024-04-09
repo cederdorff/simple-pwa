@@ -1,50 +1,42 @@
-const props = ["name", "email", "tel", "address", "icon"];
-const opts = { multiple: true };
-const supported = "contacts" in navigator && "ContactsManager" in window;
-console.log("Supported: ", supported);
-console.log("Contacts: ", navigator);
-
-document.querySelector(
-  "code"
-).textContent = `supported: ${supported} \n navigator: ${navigator} \n contacts: ${navigator.contacts} \n ContactsManager: ${window.ContactsManager}`;
-
-async function getContacts() {
-  console.log("Getting contacts...");
-  if (supported) {
-    console.log("Supported!");
-    document.querySelector(
-      "code"
-    ).textContent = `Getting contacts... \n Supported!`;
-    const contacts = await navigator.contacts.select(props, opts);
-    console.log(contacts);
-    document.querySelector("code").textContent = JSON.stringify(contacts);
-  }
+if ("contacts" in navigator && "ContactsManager" in window) {
+  getContacts();
 }
+async function getContacts() {
+  const props = await navigator.contacts.getProperties();
+  const list = document.querySelector("#contacts");
+  const button = document.querySelector("#select-contacts");
 
-const btn = document.querySelector("#btn-contacts");
-btn.addEventListener("click", getContacts);
+  list.innerHTML = "";
 
-if ("IdleDetector" in window) {
-  const idleBtn = document.getElementById("idle");
-  idleBtn.addEventListener("click", event => runIdleDetection());
+  const showContacts = contacts => {
+    const html = contacts.reduce((html, contact) => {
+      const names = contact.name.join(", ");
+      const emails = contact.email.join(", ");
+      const telephone = contact.tel.join(", ");
 
-  async function runIdleDetection() {
-    const state = await IdleDetector.requestPermission();
-    console.log(state);
+      return `${html}
+        <p>
+          <span>
+            <i class="material-icons">person</i>
+            <strong>${names}</strong><br>
+          </span>
+          <span>
+            <i class="material-icons">mail_outline</i>
+            ${emails}<br>
+          </span>
+          <span>
+            <i class="material-icons">phone</i>
+            ${telephone}</p>
+          </span>
+        `;
+    }, ``);
 
-    const idleDetector = new IdleDetector();
+    list.innerHTML = html;
+  };
 
-    idleDetector.addEventListener("change", () => {
-      const { userState, screenState } = idleDetector;
-      console.log(idleDetector);
+  button.addEventListener("click", async e => {
+    const contacts = await navigator.contacts.select(props, { multiple: true });
 
-      if (userState == "idle") {
-        // update database with status
-      }
-    });
-
-    await idleDetector.start({
-      threshold: 120000
-    });
-  }
+    showContacts(contacts);
+  });
 }
