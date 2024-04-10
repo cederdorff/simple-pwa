@@ -1,72 +1,81 @@
-// ========== Select Contacts ========== //
+// ========== Init Features ========== //
+document
+  .querySelector("#btn-select-contacts")
+  .addEventListener("click", selectContacts);
 
-if ("contacts" in navigator && "ContactsManager" in window) {
-  getContacts();
-}
-async function getContacts() {
-  const props = await navigator.contacts.getProperties();
+document
+  .querySelector("#btn-send-notification")
+  .addEventListener("click", sendNotification);
+
+document
+  .querySelector("#btn-geolocation")
+  .addEventListener("click", getGeolocation);
+
+// ========== Select Contacts ========== //
+async function selectContacts() {
+  console.log("selectContacts");
   const list = document.querySelector("#contacts");
-  const button = document.querySelector("#select-contacts");
+
+  if (!("contacts" in navigator && "ContactsManager" in window)) {
+    list.textContent = "Contacts API is not available";
+    return;
+  }
+
+  const props = await navigator.contacts.getProperties();
+  const contacts = await navigator.contacts.select(props, {
+    multiple: true
+  });
 
   list.innerHTML = "";
 
-  const showContacts = contacts => {
-    const html = contacts.reduce((html, contact) => {
-      const names = contact.name.join(", ");
-      const emails = contact.email.join(", ");
-      const telephone = contact.tel.join(", ");
+  const html = contacts.reduce((html, contact) => {
+    const names = contact.name.join(", ");
+    const emails = contact.email.join(", ");
+    const telephone = contact.tel.join(", ");
 
-      return `${html}
+    return `${html}
         <p>
           <span>
-            <i class="material-icons">person</i>
             <strong>${names}</strong><br>
           </span>
           <span>
-            <i class="material-icons">mail_outline</i>
             ${emails}<br>
           </span>
           <span>
-            <i class="material-icons">phone</i>
             ${telephone}</p>
           </span>
         `;
-    }, ``);
+  }, ``);
 
-    list.innerHTML = html;
-  };
-
-  button.addEventListener("click", async e => {
-    const contacts = await navigator.contacts.select(props, { multiple: true });
-
-    showContacts(contacts);
-  });
+  list.innerHTML = html;
 }
 
 // ========== Show Notification ========== //
 
-async function getNotificationPermission() {
+async function sendNotification() {
   const notification = document.querySelector("#notification");
-  const sendButton = document.querySelector("#send");
+
+  if (!("Notification" in window)) {
+    notification.textContent = "Notification API is not available";
+    return;
+  }
+
   const registration = await navigator.serviceWorker.getRegistration();
 
-  async function sendNotification() {
-    if (Notification.permission === "granted") {
-      showNotification(notification.value);
-    } else {
-      if (Notification.permission !== "denied") {
-        const permission = await Notification.requestPermission();
+  if (Notification.permission === "granted") {
+    showNotification(notification.value);
+  } else {
+    if (Notification.permission !== "denied") {
+      const permission = await Notification.requestPermission();
 
-        if (permission === "granted") {
-          showNotification(notification.value);
-        }
+      if (permission === "granted") {
+        showNotification(notification.value);
       }
     }
   }
-  sendNotification();
 
   function showNotification(body) {
-    const title = "What PWA Can Do Today";
+    const title = "Simple PWA";
 
     const payload = {
       body
@@ -78,8 +87,26 @@ async function getNotificationPermission() {
       new Notification(title, payload);
     }
   }
-
-  sendButton.addEventListener("click", sendNotification);
 }
 
-getNotificationPermission();
+// ========== Get Geolocation ========== //
+
+async function getGeolocation() {
+  const geolocation = document.querySelector("#geolocation");
+  const map = document.querySelector("#map");
+
+  geolocation.textContent = "Loading...";
+
+  if (!("geolocation" in navigator)) {
+    geolocation.textContent = "Geolocation is not available";
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(position => {
+    const { latitude, longitude } = position.coords;
+
+    geolocation.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
+
+    map.src = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude},${latitude}&marker=${latitude},${longitude}`;
+  });
+}
