@@ -54,13 +54,12 @@ async function selectContacts() {
 
 async function sendNotification() {
   const notification = document.querySelector("#notification");
+  const registration = await navigator.serviceWorker.getRegistration();
 
   if (!("Notification" in window)) {
     notification.textContent = "Notification API is not available";
     return;
   }
-
-  const registration = await navigator.serviceWorker.getRegistration();
 
   if (Notification.permission === "granted") {
     showNotification(notification.value);
