@@ -8,6 +8,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+      "src": "splash.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
   "theme_color": "#acc6c9",
