@@ -54,44 +54,38 @@ async function selectContacts() {
 // ========== Show Notification ========== //
 
 async function sendNotification() {
-  const notification = document.querySelector("#notification"); // Get the notification element
-  const registration = await navigator.serviceWorker.getRegistration(); // Get the service worker registration
+  const notificationValue = document.querySelector("#notification").value; // Get the notification message
 
-  // Check if the Notification API is available
+  // Check if the Notification API is available and permission is granted or request it
   if (!("Notification" in window)) {
-    notification.textContent = "Notification API is not available";
+    alert("Notification API is not available");
     return;
   }
 
-  // Check if the permission is granted
-  if (Notification.permission === "granted") {
-    showNotification(notification.value); // Show the notification
-  } else {
-    // If the permission is not granted, request the permission
-    if (Notification.permission !== "denied") {
-      const permission = await Notification.requestPermission(); // Request the permission
-
-      // If the permission is granted, show the notification
-      if (permission === "granted") {
-        showNotification(notification.value); // Show the notification
-      }
-    }
+  // Request permission if it hasn't been granted or denied yet
+  let permission = Notification.permission;
+  if (permission !== "granted" && permission !== "denied") {
+    permission = await Notification.requestPermission();
   }
 
-  // Show the notification
-  function showNotification(body) {
-    const title = "Simple PWA"; // Set the title of the notification
+  // Show the notification if permission is granted
+  if (permission === "granted") {
+    showNotification(notificationValue);
+  }
+}
 
-    const payload = {
-      body
-    }; // Set the payload of the notification
+// Simplified showNotification function
+async function showNotification(body) {
+  // Assuming the service worker is already registered and active
+  const registration = await navigator.serviceWorker.getRegistration();
+  const title = "Simple PWA"; // Notification title
+  const options = { body }; // Notification options
 
-    // Check if the showNotification method is available in the registration object
-    if ("showNotification" in registration) {
-      registration.showNotification(title, payload); // Show the notification
-    } else {
-      new Notification(title, payload); // Show the notification
-    }
+  // Use service worker to show notification if possible, else use the Notification constructor
+  if (registration && "showNotification" in registration) {
+    registration.showNotification(title, options);
+  } else {
+    new Notification(title, options);
   }
 }
 
